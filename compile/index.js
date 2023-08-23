@@ -34,7 +34,7 @@ function getTempOutputFilename() {
 module.exports = async function (context, req) {
   if (req.method == "GET") {
     context.log("Running ls on directory: " + binPath);
-    const result = child_process.execSync(`ls -alF ${tmpdir()}`);
+    const result = child_process.execSync(`ls -alF ${binPath}`);
     context.res = {
         body: result.toString(),
     };
@@ -60,22 +60,22 @@ module.exports = async function (context, req) {
     target === "rigetti" ? "decomp_b340.ll" : "decomp_7ee0.ll"
   );
 
-  const newQat = join(tmpdir(), "qat");
-  try {
-      // Below fails if it already exists
-      const handle = await fs.open(newQat, "wx");
-      context.log("New QAT binary created at " + newQat);
-      const qatHandle = await fs.open(qat, "r");
-      /** @type {any} */
-      const stream = qatHandle.createReadStream();
-      await handle.writeFile(stream, {mode: 0o755});
-      context.log("New QAT binary written");
-      handle.close();
-      qatHandle.close();
-  }
-  catch(e) {
-    context.log("QAT binary already exists");
-  }
+//   const newQat = join(tmpdir(), "qat");
+//   try {
+//       // Below fails if it already exists
+//       const handle = await fs.open(newQat, "wx");
+//       context.log("New QAT binary created at " + newQat);
+//       const qatHandle = await fs.open(qat, "r");
+//       /** @type {any} */
+//       const stream = qatHandle.createReadStream();
+//       await handle.writeFile(stream, {mode: 0o755});
+//       context.log("New QAT binary written");
+//       handle.close();
+//       qatHandle.close();
+//   }
+//   catch(e) {
+//     context.log("QAT binary already exists");
+//   }
 
   if (!req.bufferBody) return; // TODO: Return 400 - Bad Request
   await fs.writeFile(tmpInputFile, req.bufferBody);
@@ -103,7 +103,7 @@ module.exports = async function (context, req) {
     let succeeded = false;
     let response = {};
     try {
-      response = await exec(newQat, args);
+      response = await exec(qat, args);
       succeeded = true;
     } catch (e) {
       context.log("QAT failed with: " + e.toString());
