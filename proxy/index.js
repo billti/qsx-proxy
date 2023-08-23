@@ -7,6 +7,7 @@ const proxyHeaders = [
   "x-ms-version",
   "x-ms-date",
   "x-ms-blob-type",
+  "x-hardware-target"
 ];
 
 /**
@@ -15,10 +16,10 @@ const proxyHeaders = [
  */
 module.exports = async function (context, req) {
   // Only GET and PUT are of interest
-  if (req.method !== "GET" && req.method !== "PUT") {
+  if (req.method !== "GET" && req.method !== "PUT" && req.method !== "POST") {
     return {
       status: 400,
-      body: "Only GET and PUT are supported",
+      body: "Only GET, POST, and PUT are supported",
     };
   }
   const target = req.get("x-proxy-to");
