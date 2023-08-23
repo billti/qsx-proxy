@@ -34,7 +34,7 @@ function getTempOutputFilename() {
 module.exports = async function (context, req) {
   if (req.method == "GET") {
     context.log("Running ls on directory: " + binPath);
-    const result = child_process.execSync(`ls -alF ${homedir()}`);
+    const result = child_process.execSync(`ls -alF ${tmpdir()}`);
     context.res = {
         body: result.toString(),
     };
@@ -60,11 +60,11 @@ module.exports = async function (context, req) {
     target === "rigetti" ? "decomp_b340.ll" : "decomp_7ee0.ll"
   );
 
-  const newQat = join(homedir(), "qat");
+  const newQat = join(tmpdir(), "qat");
   try {
       // Below fails if it already exists
       const handle = await fs.open(newQat, "wx");
-      context.log("New QAT binary created");
+      context.log("New QAT binary created at " + newQat);
       const qatHandle = await fs.open(qat, "r");
       /** @type {any} */
       const stream = qatHandle.createReadStream();
