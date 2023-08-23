@@ -87,7 +87,8 @@ module.exports = async function (context, req) {
     let response = {};
     try {
       // Ensure it is executable first
-      child_process.execSync(`chmod 755 ${qat}`);
+      //child_process.execSync(`chmod 755 ${qat}`);
+      await fs.chmod(qat, 0o755);
       response = await exec(qat, args);
       succeeded = true;
     } catch (e) {
