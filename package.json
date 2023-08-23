@@ -1,13 +1,13 @@
 {
-  "name": "",
+  "name": "qsx-proxy",
   "version": "1.0.0",
   "description": "",
   "scripts": {
     "start": "func start",
     "test": "echo \"No tests yet...\""
   },
-  "dependencies": {},
   "devDependencies": {
+    "@azure/functions": "^3.5.1",
     "azure-functions-core-tools": "^4.x"
   }
 }

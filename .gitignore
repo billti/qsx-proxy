@@ -13,6 +13,7 @@ project.lock.json
 
 /packages
 /TestResults
+.DS_Store
 
 /tools/NuGet.exe
 /App_Data
