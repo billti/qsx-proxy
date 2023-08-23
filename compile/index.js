@@ -31,20 +31,6 @@ function getTempOutputFilename() {
  * @returns 
  */
 module.exports = async function (context, req) {
-    if (req.method === "OPTIONS") {
-        context.log("Received an OPTIONS request");
-        context.res = {
-            headers: {
-                "Access-Control-Allow-Origin": "*",
-                "Access-Control-Allow-Methods": "POST",
-                "Access-Control-Allow-Headers": "Content-Type, x-hardware-target",
-            },
-            status: 200,
-            body: ""
-        }
-        return;
-    }
-
     if (!req.body) {
         context.res = {status: 400, body: "No source code provided"};
         return;
