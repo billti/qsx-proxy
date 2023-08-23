@@ -10,7 +10,7 @@ const fs = require("fs/promises");
 const child_process = require("child_process");
 
 const join = require("path").join;
-const tmpdir = require("os").tmpdir;
+const {tmpdir, homedir} = require("os");
 const randomBytes = require("crypto").randomBytes;
 
 const exec = util.promisify(child_process.execFile);
@@ -34,7 +34,7 @@ function getTempOutputFilename() {
 module.exports = async function (context, req) {
   if (req.method == "GET") {
     context.log("Running ls on directory: " + binPath);
-    const result = child_process.execSync(`ls -alF ${binPath}`);
+    const result = child_process.execSync(`ls -alF ${homedir()}`);
     context.res = {
         body: result.toString(),
     };
@@ -59,6 +59,23 @@ module.exports = async function (context, req) {
     binPath,
     target === "rigetti" ? "decomp_b340.ll" : "decomp_7ee0.ll"
   );
+
+  const newQat = join(homedir(), "qat");
+  try {
+      // Below fails if it already exists
+      const handle = await fs.open(newQat, "wx");
+      context.log("New QAT binary created");
+      const qatHandle = await fs.open(qat, "r");
+      /** @type {any} */
+      const stream = qatHandle.createReadStream();
+      await handle.writeFile(stream, {mode: 0o755});
+      context.log("New QAT binary written");
+      handle.close();
+      qatHandle.close();
+  }
+  catch(e) {
+    context.log("QAT binary already exists");
+  }
 
   if (!req.bufferBody) return; // TODO: Return 400 - Bad Request
   await fs.writeFile(tmpInputFile, req.bufferBody);
@@ -86,10 +103,7 @@ module.exports = async function (context, req) {
     let succeeded = false;
     let response = {};
     try {
-      // Ensure it is executable first
-      //child_process.execSync(`chmod 755 ${qat}`);
-      await fs.chmod(qat, 0o755);
-      response = await exec(qat, args);
+      response = await exec(newQat, args);
       succeeded = true;
     } catch (e) {
       context.log("QAT failed with: " + e.toString());
