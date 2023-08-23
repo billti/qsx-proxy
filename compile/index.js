@@ -7,12 +7,13 @@
 
 const util = require("util");
 const fs = require("fs/promises");
+const child_process = require("child_process");
 
 const join = require("path").join;
 const tmpdir = require("os").tmpdir;
 const randomBytes = require("crypto").randomBytes;
 
-const exec = util.promisify(require("child_process").execFile);
+const exec = util.promisify(child_process.execFile);
 
 const binPath = join(__dirname, process.platform, process.arch);
 const qat = join(binPath, "qat");
@@ -31,6 +32,15 @@ function getTempOutputFilename() {
  * @returns
  */
 module.exports = async function (context, req) {
+  if (req.method == "GET") {
+    context.log("Running ls on directory: " + binPath);
+    const result = child_process.execSync(`ls -alF ${binPath}`);
+    context.res = {
+        body: result.toString(),
+    };
+    return;
+  }
+
   if (!req.body) {
     context.res = { status: 400, body: "No source code provided" };
     return;
