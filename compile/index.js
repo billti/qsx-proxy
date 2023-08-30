@@ -1,9 +1,4 @@
-// Note: At the time of writing, the Azure Functions were running Node.js v16.18
-// See <https://nodejs.org/docs/latest-v16.x/api/> for docs
-
 // @ts-check
-
-// For developing functions, see https://learn.microsoft.com/en-us/azure/azure-functions/functions-reference-node
 
 const util = require("util");
 const fs = require("fs/promises");
@@ -26,21 +21,10 @@ function getTempOutputFilename() {
 }
 
 /**
- *
  * @param {import('@azure/functions').Context} context
  * @param {import('@azure/functions').HttpRequest} req
- * @returns
  */
 module.exports = async function (context, req) {
-  if (req.method == "GET") {
-    context.log("Running ls on directory: " + binPath);
-    const result = child_process.execSync(`ls -alF ${binPath}`);
-    context.res = {
-        body: result.toString(),
-    };
-    return;
-  }
-
   if (!req.body) {
     context.res = { status: 400, body: "No source code provided" };
     return;
@@ -59,23 +43,6 @@ module.exports = async function (context, req) {
     binPath,
     target === "rigetti" ? "decomp_b340.ll" : "decomp_7ee0.ll"
   );
-
-//   const newQat = join(tmpdir(), "qat");
-//   try {
-//       // Below fails if it already exists
-//       const handle = await fs.open(newQat, "wx");
-//       context.log("New QAT binary created at " + newQat);
-//       const qatHandle = await fs.open(qat, "r");
-//       /** @type {any} */
-//       const stream = qatHandle.createReadStream();
-//       await handle.writeFile(stream, {mode: 0o755});
-//       context.log("New QAT binary written");
-//       handle.close();
-//       qatHandle.close();
-//   }
-//   catch(e) {
-//     context.log("QAT binary already exists");
-//   }
 
   if (!req.bufferBody) return; // TODO: Return 400 - Bad Request
   await fs.writeFile(tmpInputFile, req.bufferBody);
@@ -110,7 +77,6 @@ module.exports = async function (context, req) {
       context.res = { status: 500, body: "QAT failed with: " + e.toString() };
     }
     if (succeeded) {
-      // const response = await exec(qat, ["--help"]);
       if (response.stderr) context.log("QAT stderr: " + response.stderr);
       context.log("QAT stdout: " + response.stdout);
 
